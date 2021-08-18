@@ -41,6 +41,7 @@
                 <label for="inputCliente" class="col-sm-2 col-form-label">Cliente</label>
                 <div class="col-sm-10">
                 <input type="text" class="form-control" id="inputCliente" disabled>
+                <input type="hidden" class="" id="inputCNPJ" disabled>
                 </div>
             </div>
             <div class="row mb-3">
@@ -176,6 +177,8 @@
         },
         clicked(row) {
             $('#inputCliente').val(row.NOME+' - '+row.CNPJ);
+            $('#inputCNPJ').val(row.CNPJ);
+            setTotalNFE(row.CNPJ);
             // console.log (row.CNPJ);
             // alert(row.CNPJ);
             return (row.CNPJ);
@@ -198,14 +201,24 @@
         $(this).addClass("selected").siblings().removeClass("selected");
     });
 
-    var totalCliente = <?=$totaisNFE?>;
-    $("#inputTCliente").val(totalCliente[0].total_notas);
-        
+    //Setar o valor total para o cliente CNPJ
+    function setTotalNFE(cnpj){
+        var totalCliente = <?=$totaisNFE?>;
+        totais = JSON.stringify(totalCliente);
+        totais = JSON.parse(totais);
+        for(var i = 0; i < totais.length; i++) {
+            var obj = totais[i];
+            if(obj.cnpj_em == cnpj)
+                $("#inputTCliente").val(obj.total_notas);
+        }    
+    }
 
     function openModal(row){
         // console.log(row.ID);
         var produtos = "";
         $('#inputCliente').val(row.NOME+' - '+row.CNPJ);
+        $('#inputCNPJ').val(row.CNPJ);
+        setTotalNFE(row.CNPJ);
         $.post("<?=url('')?>"+"/listar-nfe-produto",{"_token": "{{ csrf_token() }}",numero_nfe:row.CODIGO}, function(data, status){
             produtos = JSON.stringify(data.dataProdutos);
             produtos = JSON.parse(produtos); 
